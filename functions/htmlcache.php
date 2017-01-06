@@ -15,6 +15,7 @@
 if (!function_exists('htmlcache_filename')) {
     function htmlcache_filename($withDirectory = true)
     {
+      /*
         $protocol = 'http://';
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
             $protocol = 'https://';
@@ -31,16 +32,41 @@ if (!function_exists('htmlcache_filename')) {
         if ($withDirectory) {
             $fileName = htmlcache_directory() . $fileName;
         }
+      */
+
+        $fileName = $_SERVER['REQUEST_URI'];
+
+        $pos = strpos($fileName, '?');
+        if ($pos !== FALSE)
+        {
+          $fileName = substr($fileName, 0, $pos);
+        }
+
+        if (substr($fileName, -5) != '.html')
+        {
+          $fileName = rtrim($fileName, '/') . '/index.html';
+        }
+
+        if ($withDirectory) {
+            $fileName = rtrim(htmlcache_directory(), '/') . $fileName;
+        }
+
         return $fileName;
     }
 
     function htmlcache_directory()
     {
+      /*
         if (defined('CRAFT_STORAGE_PATH')) {
             return CRAFT_STORAGE_PATH . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
         }
         // Fallback to default directory
         return dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'runtime' . DIRECTORY_SEPARATOR . 'htmlcache' . DIRECTORY_SEPARATOR;
+      */
+      if (defined('CRAFT_BASE_PATH')) {
+          return CRAFT_BASE_PATH . 'htmlcache' . DIRECTORY_SEPARATOR;
+      }
+
     }
 
     function htmlcache_indexEnabled($enabled = true)

@@ -33,7 +33,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
             ob_start();
         }
     }
-    
+
     public function canCreateCacheFile()
     {
         // Skip if we're running in devMode
@@ -58,7 +58,7 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         if (craft()->request->isLivePreview()) {
             return false;
         }
-        
+
         // Skip if it's a post/ajax request
         if (!craft()->request->isGetRequest()) {
             return false;
@@ -66,24 +66,39 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
 
         return true;
     }
-    
+
     public function createCacheFile()
     {
         if ($this->canCreateCacheFile() && http_response_code() == 200) {
             $content = ob_get_contents();
             ob_end_flush();
             $file = $this->getCacheFileName();
+
+            $dirs = $file;
+            $pos = strrpos($dirs, '/');
+            if ($pos !== FALSE)
+            {
+              $dirs = substr($dirs, 0, $pos);
+            }
+
+            if (!mkdir($dirs, 0777, true))
+            {
+              //self::log('Failed to create folders... "' . $dirs . '"');
+            }
+
             $fp = fopen($file, 'w+');
-            if ($fp) {
+            if ($fp)
+            {
                 fwrite($fp, $content);
                 fclose($fp);
             }
-            else {
+            else
+            {
                 //self::log('HTML Cache could not write cache file "' . $file . '"');
             }
         }
     }
-    
+
     public function clearCacheFiles()
     {
         // @todo split between all/single cache file
@@ -92,17 +107,17 @@ class Htmlcache_HtmlcacheService extends BaseApplicationComponent
         }
         return true;
     }
-    
+
     private function getCacheFileName($withDirectory = true)
     {
         return \htmlcache_filename($withDirectory);
     }
-    
+
     private function getCacheFileDirectory()
     {
         return \htmlcache_directory();
     }
-    
+
     public function log($settings, $errors, $level)
     {
         // Firstly, store in plugin log file (use $level to control log level)
